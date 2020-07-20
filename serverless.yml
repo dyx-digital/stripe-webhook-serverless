@@ -1,0 +1,27 @@
+service: stripe-webhook
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'dev'}
+
+custom:
+  stages:
+    - dev
+    - stage
+    - prod
+  stripeSecret:
+    dev: sk_test_
+    stage: sk_test_
+    prod: sk_live_
+
+functions:
+  webhook:
+    handler: handler.webhook
+    environment:
+      STRIPE_SECRET: ${self:custom.stripeSecret.${self:provider.stage}}
+    events:
+      - http:
+          path: webhook
+          method: post
+          cors: true
